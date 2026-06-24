@@ -1,27 +1,34 @@
 name: Deploy Vite to GitHub Pages
 on:
   push:
-    branches: [main] # 你的主分支名
+    branches: [main]
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
-      - name: 安装Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: "pnpm"
-      - name: 安装pnpm
+
+      # 1. 先安装 pnpm（放到 setup-node 前面，官方标准顺序）
+      - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 10
+
+      # 2. 配置 Node，关联pnpm缓存
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: 安装依赖
         run: pnpm install
+
       - name: 打包项目
         run: pnpm run build
-      - name: 部署到Pages
+
+      - name: 部署到GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
